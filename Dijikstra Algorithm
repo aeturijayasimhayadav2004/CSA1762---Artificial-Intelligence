@@ -1,0 +1,49 @@
+import heapq
+
+def dijkstra(graph, start):
+    # Number of nodes in the graph
+    n = len(graph)
+    
+    # Set up the distance array, initialized to infinity
+    distances = [float('inf')] * n
+    distances[start] = 0
+    
+    # Priority queue to store (distance, node)
+    pq = [(0, start)]  # (distance to start node, start node)
+    
+    while pq:
+        # Get the node with the smallest distance
+        current_dist, current_node = heapq.heappop(pq)
+        
+        # If this distance is already larger than the recorded one, skip it
+        if current_dist > distances[current_node]:
+            continue
+        
+        # Explore the neighbors
+        for neighbor, weight in graph[current_node]:
+            distance = current_dist + weight
+            
+            # If a shorter path to the neighbor is found
+            if distance < distances[neighbor]:
+                distances[neighbor] = distance
+                heapq.heappush(pq, (distance, neighbor))
+    
+    return distances
+
+# Example graph represented as an adjacency list
+# Each node points to a list of tuples (neighbor, weight)
+graph = {
+    0: [(1, 4), (2, 1)],  # Node 0 connected to Node 1 with weight 4, Node 2 with weight 1
+    1: [(0, 4), (2, 2), (3, 5)],  # Node 1 connected to Node 0 with weight 4, Node 2 with weight 2, Node 3 with weight 5
+    2: [(0, 1), (1, 2), (3, 8)],  # Node 2 connected to Node 0 with weight 1, Node 1 with weight 2, Node 3 with weight 8
+    3: [(1, 5), (2, 8)]   # Node 3 connected to Node 1 with weight 5, Node 2 with weight 8
+}
+
+# Running Dijkstra's algorithm from node 0
+start_node = 0
+distances = dijkstra(graph, start_node)
+
+# Output the shortest distances from the start node
+print("Shortest distances from node", start_node)
+for i, dist in enumerate(distances):
+    print(f"Node {i}: {dist}")
