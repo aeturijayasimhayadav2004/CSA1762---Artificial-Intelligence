@@ -1,0 +1,123 @@
+import math
+
+# Helper function to calculate entropy
+def entropy(data):
+    """Calculate the entropy of a dataset."""
+    label_counts = {}
+    for row in data:
+        label = row[-1]  # The last element in row is the label
+        if label not in label_counts:
+            label_counts[label] = 0
+        label_counts[label] += 1
+    
+    total_rows = len(data)
+    entropy_value = 0.0
+    
+    for label in label_counts:
+        probability = label_counts[label] / total_rows
+        entropy_value -= probability * math.log2(probability)
+    
+    return entropy_value
+
+# Helper function to calculate information gain
+def information_gain(data, feature_index):
+    """Calculate the information gain of a feature."""
+    total_entropy = entropy(data)
+    
+    # Split the data based on the feature and calculate the weighted sum of entropy
+    feature_values = {}
+    for row in data:
+        feature_value = row[feature_index]
+        if feature_value not in feature_values:
+            feature_values[feature_value] = []
+        feature_values[feature_value].append(row)
+    
+    weighted_entropy = 0.0
+    for feature_value in feature_values:
+        subset = feature_values[feature_value]
+        weighted_entropy += (len(subset) / len(data)) * entropy(subset)
+    
+    return total_entropy - weighted_entropy
+
+# Helper function to find the best feature to split on
+def best_split(data):
+    """Find the feature with the highest information gain."""
+    best_feature = None
+    max_gain = -float('inf')
+    
+    # Loop through each feature
+    for feature_index in range(len(data[0]) - 1):  # Exclude the label column
+        gain = information_gain(data, feature_index)
+        if gain > max_gain:
+            max_gain = gain
+            best_feature = feature_index
+    
+    return best_feature
+
+# Helper function to check if all labels are the same
+def is_pure(data):
+    """Check if all examples have the same label."""
+    labels = [row[-1] for row in data]
+    return len(set(labels)) == 1
+
+# Function to build the decision tree
+def build_tree(data):
+    """Build the decision tree using recursion."""
+    if is_pure(data):  # If all rows have the same label, return a leaf node
+        return data[0][-1]
+    
+    if len(data[0]) == 1:  # If there are no features left to split on, return the majority label
+        labels = [row[-1] for row in data]
+        return max(set(labels), key=labels.count)
+    
+    best_feature = best_split(data)  # Find the best feature to split on
+    tree = {best_feature: {}}
+    
+    # Split data based on the best feature
+    feature_values = {}
+    for row in data:
+        feature_value = row[best_feature]
+        if feature_value not in feature_values:
+            feature_values[feature_value] = []
+        feature_values[feature_value].append(row)
+    
+    # Recursively build the tree for each subset
+    for feature_value, subset in feature_values.items():
+        tree[best_feature][feature_value] = build_tree(subset)
+    
+    return tree
+
+# Function to classify a row based on the decision tree
+def classify(tree, row):
+    """Classify a row using the decision tree."""
+    if not isinstance(tree, dict):  # If it's a leaf node, return the label
+        return tree
+    
+    feature_index = list(tree.keys())[0]
+    feature_value = row[feature_index]
+    
+    return classify(tree[feature_index].get(feature_value), row)
+
+# Sample data (Last column is the label)
+# [feature1, feature2, ..., featureN, label]
+data = [
+    [1, 1, "Yes"],
+    [1, 0, "No"],
+    [0, 1, "Yes"],
+    [0, 0, "No"],
+    [1, 1, "Yes"],
+    [1, 0, "No"],
+    [0, 1, "Yes"],
+    [0, 0, "No"]
+]
+
+# Build the decision tree
+tree = build_tree(data)
+
+# Print the decision tree
+print("Decision Tree:", tree)
+
+# Test classification
+test_row = [1, 1]  # Example test row
+prediction = classify(tree, test_row)
+print(f"Prediction for {test_row}: {prediction}")
