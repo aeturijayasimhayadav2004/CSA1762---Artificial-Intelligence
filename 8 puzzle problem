@@ -1,0 +1,76 @@
+import heapq
+
+# Define the goal state
+GOAL_STATE = [[1, 2, 3], [4, 5, 6], [7, 8, 0]]  # 0 represents the blank space
+
+# Function to find the position of the blank tile (0)
+def find_blank_position(state):
+    for i in range(3):
+        for j in range(3):
+            if state[i][j] == 0:
+                return i, j
+
+# Function to calculate the Manhattan distance (heuristic function)
+def calculate_manhattan_distance(state):
+    distance = 0
+    for i in range(3):
+        for j in range(3):
+            if state[i][j] != 0:
+                x, y = divmod(state[i][j] - 1, 3)
+                distance += abs(i - x) + abs(j - y)
+    return distance
+
+# Function to generate possible moves
+def generate_moves(state):
+    x, y = find_blank_position(state)
+    moves = []
+    for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+        new_x, new_y = x + dx, y + dy
+        if 0 <= new_x < 3 and 0 <= new_y < 3:
+            new_state = [row[:] for row in state]
+            new_state[x][y], new_state[new_x][new_y] = new_state[new_x][new_y], new_state[x][y]
+            moves.append(new_state)
+    return moves
+
+# A* algorithm to solve the puzzle
+def solve_puzzle(initial_state):
+    priority_queue = []
+    heapq.heappush(priority_queue, (0, initial_state, 0, []))
+    visited = set()
+    visited.add(tuple(map(tuple, initial_state)))
+
+    while priority_queue:
+        _, current_state, cost, path = heapq.heappop(priority_queue)
+
+        if current_state == GOAL_STATE:
+            return path
+
+        for move in generate_moves(current_state):
+            if tuple(map(tuple, move)) not in visited:
+                new_cost = cost + 1
+                heuristic = calculate_manhattan_distance(move)
+                total_cost = new_cost + heuristic
+                heapq.heappush(priority_queue, (total_cost, move, new_cost, path + [move]))
+                visited.add(tuple(map(tuple, move)))
+
+    return None  # If no solution is found
+
+# Initial configuration (example)
+initial_state = [
+    [1, 2, 3],
+    [4, 0, 5],
+    [7, 8, 6]
+]
+
+# Solve the puzzle
+solution = solve_puzzle(initial_state)
+
+# Print the solution steps
+if solution:
+    print("Solution found in {} moves.".format(len(solution)))
+    for step in solution:
+        for row in step:
+            print(row)
+        print()
+else:
+    print("No solution exists.")
