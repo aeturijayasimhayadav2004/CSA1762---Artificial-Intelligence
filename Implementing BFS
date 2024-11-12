@@ -1,0 +1,41 @@
+from collections import deque
+
+# Function to perform BFS on a graph
+def bfs(graph, start_node):
+    # Initialize a queue with the start node and a visited set
+    queue = deque([start_node])
+    visited = set([start_node])
+
+    # This dictionary will store the shortest path to each node from the start node
+    shortest_paths = {start_node: [start_node]}
+
+    while queue:
+        # Get the next node from the queue
+        current_node = queue.popleft()
+        print(f"Visiting node: {current_node}")
+
+        # Go through each neighbor of the current node
+        for neighbor in graph[current_node]:
+            if neighbor not in visited:
+                # Mark the neighbor as visited and add to the queue
+                visited.add(neighbor)
+                queue.append(neighbor)
+                
+                # Record the path to the neighbor
+                shortest_paths[neighbor] = shortest_paths[current_node] + [neighbor]
+
+    return shortest_paths
+
+# Example usage
+graph = {
+    'A': ['B', 'C'],
+    'B': ['A', 'D', 'E'],
+    'C': ['A', 'F'],
+    'D': ['B'],
+    'E': ['B', 'F'],
+    'F': ['C', 'E']
+}
+
+# Start BFS from node 'A'
+shortest_paths_from_A = bfs(graph, 'A')
+print("Shortest paths from A:", shortest_paths_from_A)
