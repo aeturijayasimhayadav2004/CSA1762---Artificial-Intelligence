@@ -1,0 +1,47 @@
+import math
+
+def tsp_dp(distances):
+    """
+    Solve the Traveling Salesman Problem using dynamic programming and bitmasking.
+    :param distances: 2D list representing the distance matrix between cities.
+    :return: The minimum cost of visiting all cities and returning to the starting city.
+    """
+    n = len(distances)
+    all_visited = (1 << n) - 1  # All cities visited bitmask
+    memo = [[None] * n for _ in range(1 << n)]  # DP table
+
+    def dp(mask, pos):
+        # Base case: all cities visited, return to the start
+        if mask == all_visited:
+            return distances[pos][0] if distances[pos][0] > 0 else math.inf
+
+        # If already computed, return the memoized value
+        if memo[mask][pos] is not None:
+            return memo[mask][pos]
+
+        # Initialize the minimum cost to infinity
+        min_cost = math.inf
+        # Explore all unvisited cities
+        for city in range(n):
+            if (mask & (1 << city)) == 0 and distances[pos][city] > 0:
+                # Recurse with the new mask including the current city
+                new_cost = distances[pos][city] + dp(mask | (1 << city), city)
+                min_cost = min(min_cost, new_cost)
+
+        # Memoize and return the minimum cost
+        memo[mask][pos] = min_cost
+        return min_cost
+
+    # Start from city 0 with only city 0 visited
+    return dp(1, 0)
+
+# Example usage
+distances = [
+    [0, 20, 42, 35],
+    [20, 0, 30, 34],
+    [42, 30, 0, 12],
+    [35, 34, 12, 0]
+]
+
+min_cost = tsp_dp(distances)
+print("Minimum travel cost:", min_cost)
