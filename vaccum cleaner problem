@@ -1,0 +1,51 @@
+from collections import deque
+
+# Define possible actions
+ACTIONS = ["LEFT", "RIGHT", "CLEAN"]
+
+# Function to solve the vacuum cleaner problem using BFS
+def vacuum_cleaner(start_state):
+    queue = deque([(start_state, [])])  # (state, actions taken to reach that state)
+    visited = set([tuple(start_state)])
+
+    while queue:
+        (current_position, room_status), path = queue.popleft()
+
+        # Check if all rooms are clean
+        if all(status == "clean" for status in room_status):
+            return path  # Return the path of actions taken to clean all rooms
+
+        # Try each action
+        for action in ACTIONS:
+            new_position, new_room_status = current_position, room_status[:]
+
+            if action == "LEFT" and current_position > 0:
+                new_position = current_position - 1
+            elif action == "RIGHT" and current_position < len(room_status) - 1:
+                new_position = current_position + 1
+            elif action == "CLEAN" and room_status[current_position] == "dirty":
+                new_room_status[current_position] = "clean"
+
+            # Create new state
+            new_state = (new_position, new_room_status)
+            if tuple(new_state) not in visited:
+                visited.add(tuple(new_state))
+                queue.append((new_state, path + [action]))
+
+    return "No solution exists."
+
+# Example usage
+# State format: (position of vacuum cleaner, list representing room cleanliness)
+# 0 represents the vacuum cleaner is in the left room
+# "dirty" or "clean" represents the state of each room
+initial_state = (0, ["dirty", "dirty"])  # Vacuum starts at the left and both rooms are dirty
+
+solution = vacuum_cleaner(initial_state)
+
+# Print the solution steps
+if solution != "No solution exists.":
+    print("Solution steps:")
+    for step in solution:
+        print(step)
+else:
+    print(solution)
