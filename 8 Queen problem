@@ -1,0 +1,44 @@
+def solveNQueens(n):
+    board = [["." for _ in range(n)] for _ in range(n)]
+    result = []
+    solve(board, 0, n, result)
+    return result
+
+def solve(board, row, n, result):
+    if row == n:
+        result.append(["".join(row) for row in board])
+        return
+    for col in range(n):
+        if isSafe(board, row, col, n):
+            board[row][col] = "Q"
+            solve(board, row + 1, n, result)
+            board[row][col] = "."
+
+def isSafe(board, row, col, n):
+    # Check the column
+    for i in range(row):
+        if board[i][col] == "Q":
+            return False
+    # Check the diagonal \
+    i, j = row, col
+    while i >= 0 and j >= 0:
+        if board[i][j] == "Q":
+            return False
+        i -= 1
+        j -= 1
+    # Check the other diagonal /
+    i, j = row, col
+    while i >= 0 and j < n:
+        if board[i][j] == "Q":
+            return False
+        i -= 1
+        j += 1
+    return True
+
+# Test the function
+n = 8
+solutions = solveNQueens(n)
+for solution in solutions:
+    for row in solution:
+        print(row)
+    print()
