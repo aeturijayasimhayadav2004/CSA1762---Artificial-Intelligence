@@ -1,0 +1,44 @@
+# Import infinity for initial values
+import math
+
+def tsp_dp(dist):
+    n = len(dist)  # Number of cities
+    memo = [[None] * n for _ in range(1 << n)]  # Memoization table
+    all_visited = (1 << n) - 1  # Bitmask where all cities have been visited
+
+    def dp(mask, pos):
+        # Base case: all cities have been visited, return to the start
+        if mask == all_visited:
+            return dist[pos][0] if dist[pos][0] > 0 else math.inf
+
+        # Check memo table to avoid re-computation
+        if memo[mask][pos] is not None:
+            return memo[mask][pos]
+
+        # Initialize minimum distance as infinity
+        min_dist = math.inf
+        # Try visiting all cities that have not been visited yet
+        for city in range(n):
+            if (mask & (1 << city)) == 0 and dist[pos][city] > 0:
+                new_dist = dist[pos][city] + dp(mask | (1 << city), city)
+                min_dist = min(min_dist, new_dist)
+
+        # Save the result in memo table
+        memo[mask][pos] = min_dist
+        return min_dist
+
+    # Start from city 0 and visit all cities
+    return dp(1, 0)
+
+# Example usage
+# Distances between cities (symmetric matrix)
+distances = [
+    [0, 20, 42, 35],
+    [20, 0, 30, 34],
+    [42, 30, 0, 12],
+    [35, 34, 12, 0]
+]
+
+# Find the minimum travel cost
+min_cost = tsp_dp(distances)
+print("Minimum travel cost:", min_cost)
