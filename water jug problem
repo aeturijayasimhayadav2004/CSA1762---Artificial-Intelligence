@@ -1,0 +1,54 @@
+from collections import deque
+
+# Function to solve the Water Jug problem using BFS
+def water_jug_solver(jug1_capacity, jug2_capacity, target):
+    # If the target is greater than both jug capacities, solution is not possible
+    if target > max(jug1_capacity, jug2_capacity):
+        return "No solution exists."
+
+    # Initialize the queue and visited set
+    queue = deque([(0, 0)])  # (jug1, jug2) initial state
+    visited = set((0, 0))  # To keep track of visited states
+    path = []
+
+    # BFS Loop
+    while queue:
+        jug1, jug2 = queue.popleft()
+        path.append((jug1, jug2))
+
+        # If either jug has the target volume, solution is found
+        if jug1 == target or jug2 == target:
+            return path
+
+        # Generate possible next moves
+        possible_moves = [
+            (jug1_capacity, jug2),  # Fill jug1
+            (jug1, jug2_capacity),  # Fill jug2
+            (0, jug2),              # Empty jug1
+            (jug1, 0),              # Empty jug2
+            (min(jug1 + jug2, jug1_capacity), max(0, jug2 - (jug1_capacity - jug1))),  # Pour jug2 -> jug1
+            (max(0, jug1 - (jug2_capacity - jug2)), min(jug1 + jug2, jug2_capacity))   # Pour jug1 -> jug2
+        ]
+
+        # Add valid moves to the queue
+        for move in possible_moves:
+            if move not in visited:
+                queue.append(move)
+                visited.add(move)
+
+    return "No solution exists."  # If no solution found
+
+# Example usage
+jug1_capacity = 4
+jug2_capacity = 3
+target = 2
+
+solution = water_jug_solver(jug1_capacity, jug2_capacity, target)
+
+# Print the solution path
+if isinstance(solution, list):
+    print("Solution steps:")
+    for step in solution:
+        print(f"Jug1: {step[0]} liters, Jug2: {step[1]} liters")
+else:
+    print(solution)
