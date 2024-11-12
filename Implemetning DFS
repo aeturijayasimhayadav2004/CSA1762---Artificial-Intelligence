@@ -1,0 +1,32 @@
+# Function to perform DFS on a graph using recursion
+def dfs(graph, start_node, visited=None, path=None):
+    if visited is None:
+        visited = set()  # Set to track visited nodes
+    if path is None:
+        path = []  # List to store the path taken during DFS
+    
+    # Mark the current node as visited
+    visited.add(start_node)
+    path.append(start_node)
+    print(f"Visiting node: {start_node}")
+
+    # Recursively visit each unvisited neighbor
+    for neighbor in graph[start_node]:
+        if neighbor not in visited:
+            dfs(graph, neighbor, visited, path)
+    
+    return path
+
+# Example usage
+graph = {
+    'A': ['B', 'C'],
+    'B': ['A', 'D', 'E'],
+    'C': ['A', 'F'],
+    'D': ['B'],
+    'E': ['B', 'F'],
+    'F': ['C', 'E']
+}
+
+# Start DFS from node 'A'
+path_from_A = dfs(graph, 'A')
+print("DFS path from A:", path_from_A)
